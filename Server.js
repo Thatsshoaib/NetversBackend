@@ -29,7 +29,7 @@ app.use("/api/upgrade", upgradeRoutes);
 app.use("/api/profile", ProfileRoutes); // this is my file for the bankdetails
 app.use("/api/payout", payoutRoutes); // this is my file for the bankdetails
 
-const PORT = 5000;
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
