@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db");
+const db = require("../Config/db");
 
 // GET XML-based user tree
 router.get("/tree/:userId/:planId", async (req, res) => {
