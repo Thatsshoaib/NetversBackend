@@ -29,8 +29,9 @@ app.use("/api/upgrade", upgradeRoutes);
 app.use("/api/profile", ProfileRoutes); // this is my file for the bankdetails
 app.use("/api/payout", payoutRoutes); // this is my file for the bankdetails
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const port = 3000;
+const hostname = '127.0.0.1';
+app.listen(port, hostname, () => {
+  console.log(Server running at http://${hostname}:${port}/);
 });
 
