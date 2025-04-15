@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const treeRoutes = require("./Routes/treeRoutes");
+const treeRoutes = require("Routes/treeRoutes");
 // const authRoutes = require("./Routes/authRoutes");
 // const sponsorRoutes = require("./Routes/sponsorRoutes");
 // const commissionsRoutes = require("./Routes/commissionRoutes");
