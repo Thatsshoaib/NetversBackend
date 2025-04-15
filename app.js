@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const treeRoutes = require(path.join(__dirname,'Routes','treeRoutes'));
 // const authRoutes = require("./Routes/authRoutes");
 // const sponsorRoutes = require("./Routes/sponsorRoutes");
 // const commissionsRoutes = require("./Routes/commissionRoutes");
@@ -13,6 +12,9 @@ const treeRoutes = require(path.join(__dirname,'Routes','treeRoutes'));
 
 const app = express();
 const path = require('path');
+
+const treeRoutes = require(path.join(__dirname,'Routes','treeRoutes'));
+
 
 app.use(cors());
 app.use(express.json());
