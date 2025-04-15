@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db"); // MySQL connection file
+const db = require("../Config/db"); // MySQL connection file
 
 // Add Reward
 router.post("/add", async (req, res) => {
