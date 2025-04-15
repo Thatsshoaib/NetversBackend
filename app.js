@@ -24,9 +24,6 @@ app.use(express.static(path.join(__dirname, 'dist')));
 // app.get('/', (req, res) => {
 //   res.send('hello, Welcome');
 // });
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
 app.use("/api/auth", authRoutes);
 app.use("/api", treeRoutes);
 app.use("/api/users", sponsorRoutes);
@@ -38,6 +35,9 @@ app.use("/api/upgrade", upgradeRoutes);
 app.use("/api/profile", ProfileRoutes); // this is my file for the bankdetails
 app.use("/api/payout", payoutRoutes); // this is my file for the bankdetails
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 const port = 3000;
 const hostname = '127.0.0.1';
 app.listen(port, hostname, () => {
