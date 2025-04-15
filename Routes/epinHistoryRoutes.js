@@ -1,6 +1,6 @@
 
 const express = require("express");
-const db = require("../config/db"); // Ensure DB connection is correct
+const db = require("../Config/db"); // Ensure DB connection is correct
 const router = express.Router();
 
 router.get("/history", async (req, res) => {
