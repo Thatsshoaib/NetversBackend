@@ -11,7 +11,7 @@ router.post('/admin/upgrade-plan', async (req, res) => {
   try {
     // ✅ Step 1: Get sponsor_id of this user
     const [result] = await db.query(
-      "SELECT sponsor_id FROM UserPlans WHERE user_id = ? ORDER BY created_at DESC LIMIT 1",
+      "SELECT sponsor_id FROM userplans WHERE user_id = ? ORDER BY created_at DESC LIMIT 1",
       [user_id] // ✅ This is correct now
     );
 
