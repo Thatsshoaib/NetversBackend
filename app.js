@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-// const treeRoutes = require("./Routes/treeRoutes");
+const treeRoutes = require("../Routes/treeRoutes");
 // const authRoutes = require("./Routes/authRoutes");
 // const sponsorRoutes = require("./Routes/sponsorRoutes");
 // const commissionsRoutes = require("./Routes/commissionRoutes");
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 });
 
 // app.use("/api/auth", authRoutes);
-// app.use("/api", treeRoutes);
+app.use("/api", treeRoutes);
 // app.use("/api/users", sponsorRoutes);
 // app.use("/api/commissions", commissionsRoutes);
 // app.use("/api/epins", epinRoutes);
