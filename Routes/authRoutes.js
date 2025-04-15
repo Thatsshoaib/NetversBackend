@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const db = require("../config/db"); // ✅ Import the fixed MySQL connection
+const db = require("../Config/db"); // ✅ Import the fixed MySQL connection
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
