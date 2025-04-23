@@ -74,14 +74,16 @@ router.post("/register", async (req, res) => {
 
 
 
-
-// ✅ FIXED LOGIN ROUTE
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const [rows] = await db.query("SELECT u.*, up.plan_id FROM users u LEFT JOIN userplans up ON u.user_id = up.user_id  WHERE u.email = ?", [email]);
-
+        const [rows] = await db.query(`
+            SELECT u.*, up.plan_id
+            FROM users u
+            LEFT JOIN userplans up ON u.user_id = up.user_id
+            WHERE u.email = ?
+          `, [email]);
         if (rows.length === 0) {
             return res.status(401).json({ message: "User not found" });
         }
@@ -104,7 +106,7 @@ router.post("/login", async (req, res) => {
                 email: user.email,
                 sponsor_id: user.sponsor_id,
                 plan_id: user.plan_id,
-                role: user.role  // ✅ Include role
+                role: user.role  
             },
             token
         });
@@ -114,6 +116,7 @@ router.post("/login", async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
 
 
 
