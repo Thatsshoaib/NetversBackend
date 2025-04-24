@@ -79,10 +79,7 @@ router.post("/login", async (req, res) => {
 
     try {
         const [rows] = await db.query(`
-            SELECT u.*, up.plan_id
-            FROM users u
-            LEFT JOIN userplans up ON u.user_id = up.user_id
-            WHERE u.email = ?
+            SELECT * FROM users WHERE email = ?
           `, [email]);
         if (rows.length === 0) {
             return res.status(401).json({ message: "User not found" });
