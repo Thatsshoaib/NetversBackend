@@ -10,6 +10,8 @@ const rewardRoutes = require("./Routes/rewardRoutes"); // ✅ Correct import
 const upgradeRoutes = require("./Routes/upgradeRoutes")
 const ProfileRoutes = require("./Routes/profileRoutes")
 const payoutRoutes = require("./Routes/payoutRoutes")
+const passwordRoutes = require("./Routes/pswrdRoutes")
+
 
 const app = express();
 const path = require('path');
@@ -34,6 +36,8 @@ app.use("/api/rewards", rewardRoutes);
 app.use("/api/upgrade", upgradeRoutes);
 app.use("/api/profile", ProfileRoutes); // this is my file for the bankdetails
 app.use("/api/payout", payoutRoutes); // this is my file for the bankdetails
+app.use("/api/pswrd", passwordRoutes); // this is my file for the bankdetails
+
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
