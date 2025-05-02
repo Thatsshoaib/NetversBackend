@@ -37,29 +37,36 @@ router.post("/register", async (req, res) => {
     const userCount = userCountResult[0].total;
 
     // ✅ E-PIN Validation (skip for first user only)
-    if (userCount > 0) {
-      if (!epin) {
-        return res.status(400).json({ message: "E-PIN is required!" });
-      }
+   // ✅ E-PIN Validation (skip for first user only)
+if (userCount > 0) {
+  if (!epin) {
+    return res.status(400).json({ message: "E-PIN is required!" });
+  }
 
-      const checkEpinQuery = `SELECT id, assigned_to, status FROM epins WHERE epin_code = ?`;
-      const [epinResult] = await db.query(checkEpinQuery, [epin]);
+  const checkEpinQuery = `SELECT id, assigned_to, status FROM epins WHERE epin_code = ?`;
+  const [epinResult] = await db.query(checkEpinQuery, [epin]);
 
-      if (epinResult.length === 0) {
-        return res.status(400).json({ message: "Invalid E-PIN! Please enter a valid E-PIN." });
-      }
+  if (epinResult.length === 0) {
+    return res.status(400).json({ message: "Invalid E-PIN! Please enter a valid E-PIN." });
+  }
 
-      const { id, assigned_to, status } = epinResult[0];
-      epinId = id;
+  const { id, assigned_to, status } = epinResult[0];
+  epinId = id;
 
-      if (status !== "unused") {
-        return res.status(400).json({ message: "E-PIN already used! Please enter a new E-PIN." });
-      }
+  if (status !== "unused") {
+    return res.status(400).json({ message: "E-PIN already used! Please enter a new E-PIN." });
+  }
 
-      if (Number(assigned_to) !== Number(sponsorUserId)) {
-        return res.status(400).json({ message: "E-PIN does not belong to the sponsor ID provided!" });
-      }
-    }
+  if (Number(assigned_to) !== Number(sponsorUserId)) {
+    return res.status(400).json({ message: "E-PIN does not belong to the sponsor ID provided!" });
+  }
+
+} else {
+  // First user - no E-PIN required
+  epinId = null;
+  console.log("First user registration - skipping E-PIN check.");
+}
+
 
     // ✅ Hash password
     const salt = await bcrypt.genSalt(10);
