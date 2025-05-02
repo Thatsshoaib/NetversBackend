@@ -45,9 +45,9 @@ router.post("/register", async (req, res) => {
       const checkEpinQuery = `SELECT id, assigned_to, status FROM epins WHERE epin_code = ?`;
       const [epinResult] = await db.query(checkEpinQuery, [epin]);
 
-      if (epinResult.length === 0) {
-        return res.status(400).json({ message: "Invalid E-PIN! Please enter a valid E-PIN." });
-      }
+      // if (epinResult.length === 0) {
+      //   return res.status(400).json({ message: "Invalid E-PIN! Please enter a valid E-PIN." });
+      // }
 
       const { id, assigned_to, status } = epinResult[0];
       epinId = id;
