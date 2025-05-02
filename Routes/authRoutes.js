@@ -106,6 +106,7 @@ if (userCount > 0) {
 
 
 
+
 router.post("/login", async (req, res) => {
   const { u_code, password } = req.body;
 
@@ -155,10 +156,6 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
-
-
-
 // router.post("/login", async (req, res) => {
 //     const { email, password } = req.body;
 
