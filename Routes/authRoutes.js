@@ -100,46 +100,53 @@ router.post("/register", async (req, res) => {
 
 
 router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+  const { u_code, password } = req.body;
 
-    try {
-        const [rows] = await db.query(`
+  try {
+    const [rows] = await db.query(
+      `
             SELECT u.*, up.plan_id
             FROM users u
             LEFT JOIN userplans up ON u.user_id = up.user_id
-            WHERE u.email = ?
-          `, [email]);
-        if (rows.length === 0) {
-            return res.status(401).json({ message: "User not found" });
-        }
-
-        const user = rows[0]; // Get the first user object
-
-        // Check password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign({ user_id: user.user_id, role: user.role }, "SECRET_KEY", { expiresIn: "1h" });
-
-        res.json({
-            user: {
-                user_id: user.user_id,
-                name: user.name,
-                email: user.email,
-                sponsor_id: user.sponsor_id,
-                plan_id: user.plan_id,
-                role: user.role  
-            },
-            token
-        });
-
-    } catch (error) {
-        console.error("Login Error:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+            WHERE u.u_code = ?
+          `,
+      [u_code]
+    );
+    if (rows.length === 0) {
+      return res.status(401).json({ message: "User not found" });
     }
+
+    const user = rows[0]; // Get the first user object
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { user_id: user.user_id, role: user.role },
+      "SECRET_KEY",
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        sponsor_id: user.sponsor_id,
+        plan_id: user.plan_id,
+        role: user.role,
+        u_code: user.u_code, // Include U_code in the response
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 
