@@ -104,9 +104,6 @@ if (userCount > 0) {
 });
 
 
-
-
-
 router.post("/login", async (req, res) => {
   const { u_code, password } = req.body;
 
