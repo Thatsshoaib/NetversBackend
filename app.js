@@ -44,7 +44,7 @@ app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 const port = 3000;
-const hostname = '127.0.0.1';
+const hostname = '0.0.0.0';
 app.listen(port, hostname, () => {
   console.log('Server running at http://${hostname}:${port}/');
 });
