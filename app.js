@@ -38,8 +38,9 @@ app.use("/api/profile", ProfileRoutes); // this is my file for the bankdetails
 app.use("/api/payout", payoutRoutes); // this is my file for the bankdetails
 app.use("/api/pswrd", passwordRoutes); // this is my file for the bankdetails
 
-
-app.get('*', (req, res) => {
+ 
+// app.get('*', (req, res) 
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 const port = 3000;
