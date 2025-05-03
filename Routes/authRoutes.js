@@ -113,7 +113,7 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-    return res.json({ alert: true, message: "hi" });
+     
 
   const { u_code, password } = req.body;
 
