@@ -33,12 +33,12 @@ router.get("/plans", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.get("/user/:id", async (req, res) => {
-  const userID = req.params.id;
+router.get("/user/:code", async (req, res) => {
+  const userCode = req.params.code;
 
   try {
-    const [user] = await db.query("SELECT name FROM users WHERE user_id = ?", [
-      userID,
+    const [user] = await db.query("SELECT name FROM users WHERE U_code = ?", [
+      userCode,
     ]);
 
     if (user.length === 0) {
@@ -51,6 +51,7 @@ router.get("/user/:id", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 router.get("/user-epins", async (req, res) => {
   try {
     const userId = req.user.id; // Get user ID from JWT token
@@ -107,25 +108,57 @@ router.get("/user-epins", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.post("/reshare-epin", (req, res) => {
-  const { epin_code, sender_id, receiver_id } = req.body;
+router.post("/reshare-epin", async (req, res) => {
+  const { epin_codes, receiver_ucode, sender_id } = req.body;
+  console.log("Request body:", req.body); // Log the incoming data
 
-  if (!epin_code || !sender_id || !receiver_id) {
-    console.log("⚠️ Missing fields in request:", { epin_code, sender_id, receiver_id });
-    return res.status(400).json({ error: "All fields are required!" });
+  // Ensure all fields are present
+  if (!Array.isArray(epin_codes) || epin_codes.length === 0 || !receiver_ucode || !sender_id) {
+    console.log("⚠️ Missing or invalid fields in request:", { epin_codes, sender_id, receiver_ucode });
+    return res.status(400).json({ error: "All fields are required and epin_codes must be a non-empty array." });
   }
 
-  const query = `CALL ReshareEpin(?, ?, ?)`; // Ensure the stored procedure exists
+  console.log("✅ /reshare-epin route hit with body:", req.body);
 
-  db.query(query, [epin_code, sender_id, receiver_id], (err, results) => {
-    if (err) {
-      console.error("❌ Error resharing E-PIN:", err);
-      return res.status(500).json({ error: err.sqlMessage || "Database error" });
+  try {
+    // Step 1: Get user_id from users table using U_code
+    const getUserQuery = `SELECT user_id FROM users WHERE U_code = ? LIMIT 1`;
+    const [results] = await db.query(getUserQuery, [receiver_ucode]);
+
+    console.log("SQL Result for receiver lookup:", results);  // Log query result
+
+    if (results.length === 0) {
+      console.error("❌ Receiver U_code not found.");
+      return res.status(404).json({ error: "Receiver U_code not found." });
     }
 
-    console.log("✅ E-PIN reshared successfully!", results);
-    res.json({ message: "E-PIN reshared successfully!" });
-  });
+    const receiver_id = results[0].user_id;
+    console.log("✅ Resolved receiver_id:", receiver_id);
+
+    // Step 2: Update the epins with new assigned_to
+    const placeholders = epin_codes.map(() => '?').join(',');
+    const updateQuery = `
+      UPDATE epins 
+      SET assigned_to = ? 
+      WHERE epin_code IN (${placeholders})
+    `;
+    const params = [receiver_id, ...epin_codes];
+
+    console.log("Executing query:", updateQuery, "with params:", params); // Log query for debugging
+
+    const [updateResult] = await db.query(updateQuery, params);
+
+    if (updateResult.affectedRows === 0) {
+      console.error("❌ No rows were updated.");
+      return res.status(404).json({ error: "No matching E-PINs found to update." });
+    }
+
+    console.log("✅ E-PINs reshared successfully!", updateResult);
+    res.json({ message: "E-PINs reshared successfully!" });
+  } catch (err) {
+    console.error("❌ Error in /reshare-epin route:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
 });
 
 module.exports = router;
