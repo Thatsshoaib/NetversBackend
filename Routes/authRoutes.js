@@ -113,8 +113,7 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-     
-
+  // return res.json({ alert: true, message: "hi" });
   const { u_code, password } = req.body;
 
   try {
@@ -123,7 +122,7 @@ router.post("/login", async (req, res) => {
             SELECT u.*, up.plan_id
             FROM users u
             LEFT JOIN userplans up ON u.user_id = up.user_id
-            WHERE u.U_code = ?
+            WHERE u.u_code = ?
           `,
       [u_code]
     );
@@ -132,12 +131,20 @@ router.post("/login", async (req, res) => {
     }
 
     const user = rows[0]; // Get the first user object
+    console.log("User from DB:", user); // Debugging line
+    console.log("User's u_code from DB:", user.U_code); // Debugging line
 
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    const [userPlans] = await db.query(
+      "SELECT plan_id FROM userplans WHERE user_id = ?",
+      [user.user_id]
+    );
+    const planIds = userPlans.map((plan) => plan.plan_id);
+    const totalPlans = planIds.length;
 
     // Generate JWT token
     const token = jwt.sign(
@@ -152,9 +159,10 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         sponsor_id: user.sponsor_id,
-        plan_id: user.plan_id,
+        enrolled_plans: planIds, // 🔥 All plan IDs as an array
+        total_enrolled_plans: totalPlans,
         role: user.role,
-        u_code: user.U_code, // Include U_code in the response
+        u_code: user.U_code, // ✅ Ensure this line is not accidentally removed
       },
       token,
     });
