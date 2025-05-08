@@ -12,11 +12,20 @@ router.post("/generate-epins", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Call Stored Procedure using async/await
-    const [result] = await db.execute(`CALL GenerateRandomEpins(?, ?, ?)`, [
+    // Step 1: Convert u_code (assignedUser) to user_id
+    const [userResult] = await db.execute("SELECT user_id FROM users WHERE u_code = ?", [assignedUser]);
+
+    if (userResult.length === 0) {
+      return res.status(400).json({ error: "User not found for the given U-Code" });
+    }
+
+    const userID = userResult[0].user_id; // Use the correct column name
+
+    // Step 2: Call Stored Procedure with the retrieved user_id
+    const [result] = await db.execute("CALL GenerateRandomEpins(?, ?, ?)", [
       planID,
       epinCount,
-      assignedUser,
+      userID, // Pass the user_id to the stored procedure
     ]);
 
     res.json({ message: "E-PINs generated successfully!", result });
