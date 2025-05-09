@@ -1,5 +1,5 @@
 const express = require("express");
-const db = require("../Config/db"); // Ensure database connection is correct
+const db = require("../config/db"); // Ensure database connection is correct
 const router = express.Router();
 
 router.get("/sponsors", async (req, res) => {
@@ -46,7 +46,7 @@ router.get("/directs", async (req, res) => {
 
     try {
         // Direct SQL query to count the number of users with the given sponsor ID
-        const query = `SELECT COUNT(*) AS total_directs FROM userplans WHERE sponsor_id = ?;`;
+        const query = `SELECT COUNT(DISTINCT user_id) AS total_directs FROM userplans WHERE sponsor_id = ?;`;
 
         console.log("📢 Executing Query:", query, "with userId:", userId);
 
@@ -85,13 +85,25 @@ router.get("/total-income", async (req, res) => {
 });
 // Get all users
 router.get("/users", async (req, res) => {
+    const { u_code } = req.query;
+  
     try {
-        const [users] = await db.query("SELECT user_id, name, email FROM users");
-        res.json(users);
+      let query = "SELECT user_id, name, email FROM users";
+      let params = [];
+  
+      // If u_code is provided, add WHERE clause
+      if (u_code) {
+        query += " WHERE u_code = ?";
+        params.push(u_code);
+      }
+  
+      const [users] = await db.query(query, params);
+      res.json(users);
     } catch (error) {
-        console.error("Error fetching users:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   });
+  
 
 module.exports = router;
