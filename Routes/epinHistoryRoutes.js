@@ -1,6 +1,6 @@
 
 const express = require("express");
-const db = require("../Config/db"); // Ensure DB connection is correct
+const db = require("../config/db"); // Ensure DB connection is correct
 const router = express.Router();
 
 router.get("/history", async (req, res) => {
@@ -18,6 +18,8 @@ router.get("/history", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
 // Fetch assigned E-PINs using stored procedure
 router.get("/user-epins/:userID", async (req, res) => {
     const { userID } = req.params;
