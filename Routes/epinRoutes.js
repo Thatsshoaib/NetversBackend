@@ -1,5 +1,5 @@
 const express = require("express");
-const db = require("../Config/db");
+const db = require("../config/db");
 
 const router = express.Router();
 
@@ -33,6 +33,8 @@ router.post("/generate-epins", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
 router.get("/plans", async (req, res) => {
   try {
     const [plans] = await db.query("SELECT plan_id, plan_name FROM plans");
@@ -117,6 +119,7 @@ router.get("/user-epins", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 router.post("/reshare-epin", async (req, res) => {
   const { epin_codes, receiver_ucode, sender_id } = req.body;
   console.log("Request body:", req.body); // Log the incoming data
@@ -169,5 +172,15 @@ router.post("/reshare-epin", async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 });
+
+
+
+
+
+
+
+
+// ✅ Mark a specific E-PIN as used
+
 
 module.exports = router;
