@@ -5,8 +5,14 @@ const router = express.Router();
 
 router.get("/history", async (req, res) => {
   try {
-    const [epins] = await db.execute("SELECT * FROM epins"); // Adjust query if needed
-    res.json(epins); // ✅ Ensure it returns JSON
+    // Correct the JOIN to match 'assigned_to' in epins with 'user_id' in users
+    const [epins] = await db.execute(`
+      SELECT epins.*, users.u_code 
+      FROM epins
+      JOIN users ON epins.assigned_to = users.user_id
+    `);
+
+    res.json(epins); // ✅ Return the joined data as JSON
   } catch (error) {
     console.error("Error fetching E-PIN history:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
