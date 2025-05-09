@@ -33,7 +33,6 @@ router.get("/sponsors", async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 });
-
 router.get("/directs", async (req, res) => {
     const userId = req.query.userId;
 
