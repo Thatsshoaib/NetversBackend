@@ -173,6 +173,28 @@ router.post("/reshare-epin", async (req, res) => {
   }
 });
 
+router.get("/user-unused-epins", async (req, res) => {
+  try {
+    const userId = req.query.user_id;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Fetch only unused E-PINs assigned to the user
+    const [epins] = await db.execute(
+      `SELECT epins.id, epins.epin_code, epins.status, epins.assigned_to, epins.created_at, epins.plan_id 
+       FROM epins
+       WHERE epins.assigned_to = ? AND epins.status = 'unused'`,
+      [userId]
+    );
+
+    res.json(epins);
+  } catch (error) {
+    console.error("Error fetching unused E-PINs:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 
 
