@@ -104,6 +104,28 @@ router.get("/users", async (req, res) => {
       res.status(500).json({ message: "Internal Server Error" });
     }
   });
-  
+
+
+router.get('/all-users', async (req, res) => {
+  const sql = `
+    SELECT 
+      users.user_id,
+      users.name,
+      users.u_code,
+      GROUP_CONCAT(DISTINCT plans.plan_name) AS plan_names
+    FROM users
+    LEFT JOIN userplans ON users.user_id = userplans.user_id
+    LEFT JOIN plans ON userplans.plan_id = plans.plan_id
+    GROUP BY users.user_id, users.name, users.u_code;
+  `;
+
+  try {
+    const [results] = await db.execute(sql);  // no callback here
+    res.json({ users: results });
+  } catch (err) {
+    console.error('Database error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 module.exports = router;
