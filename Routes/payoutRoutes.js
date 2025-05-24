@@ -122,4 +122,34 @@ router.get("/totals", async (req, res) => {
 });
 
 
+router.get("/all-payouts", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT 
+     p.id, 
+     p.amount, 
+     p.payout_date, 
+     p.transaction_id, 
+     u.user_id AS user_id,
+     u.name AS user_name,
+     u.U_code
+FROM payouts p
+JOIN users u ON p.user_id = u.user_id
+ORDER BY p.payout_date DESC`
+    );
+
+    const total = rows.reduce((sum, row) => sum + parseFloat(row.amount), 0);
+
+    res.json({
+      total,
+      history: rows,
+    });
+  } catch (err) {
+    console.error("Error fetching payout history:", err);
+    res.status(500).json({ error: "Failed to fetch payout history" });
+  }
+});
+
+
+
 module.exports = router;
