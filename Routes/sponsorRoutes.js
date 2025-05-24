@@ -107,6 +107,7 @@ router.get("/users", async (req, res) => {
 
 
 
+
 // Get all users
 router.get('/all-users', async (req, res) => {
   const sql = `
@@ -129,6 +130,5 @@ router.get('/all-users', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 module.exports = router;
