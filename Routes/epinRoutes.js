@@ -2,7 +2,6 @@ const express = require("express");
 const db = require("../Config/db");
 
 const router = express.Router();
-
 // Route to Generate E-PINs Using Stored Procedure
 router.post("/generate-epins", async (req, res) => {
   try {
@@ -120,6 +119,31 @@ router.get("/user-epins", async (req, res) => {
   }
 });
 
+// Route to get unused E-PINs assigned to a specific user
+router.get("/user-unused-epins", async (req, res) => {
+  try {
+    const userId = req.query.user_id;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Fetch only unused E-PINs assigned to the user
+    const [epins] = await db.execute(
+      `SELECT epins.id, epins.epin_code, epins.status, epins.assigned_to, epins.created_at, epins.plan_id 
+       FROM epins
+       WHERE epins.assigned_to = ? AND epins.status = 'unused'`,
+      [userId]
+    );
+
+    res.json(epins);
+  } catch (error) {
+    console.error("Error fetching unused E-PINs:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 router.post("/reshare-epin", async (req, res) => {
   const { epin_codes, receiver_ucode, sender_id } = req.body;
   console.log("Request body:", req.body); // Log the incoming data
@@ -173,36 +197,6 @@ router.post("/reshare-epin", async (req, res) => {
   }
 });
 
-
-
-
-router.get("/user-unused-epins", async (req, res) => {
-  try {
-    const userId = req.query.user_id;
-
-    if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
-    }
-
-    // Fetch only unused E-PINs assigned to the user
-    const [epins] = await db.execute(
-      `SELECT epins.id, epins.epin_code, epins.status, epins.assigned_to, epins.created_at, epins.plan_id 
-       FROM epins
-       WHERE epins.assigned_to = ? AND epins.status = 'unused'`,
-      [userId]
-    );
-
-    res.json(epins);
-  } catch (error) {
-    console.error("Error fetching unused E-PINs:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-
-
-
-// ✅ Mark a specific E-PIN as used
 
 
 module.exports = router;
