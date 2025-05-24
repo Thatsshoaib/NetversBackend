@@ -106,6 +106,7 @@ router.get("/users", async (req, res) => {
   });
 
 
+
 // Get all users
 router.get('/all-users', async (req, res) => {
   const sql = `
