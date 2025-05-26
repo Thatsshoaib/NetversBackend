@@ -7,16 +7,16 @@ router.get("/tree/:userId/:planId", async (req, res) => {
   const { userId, planId } = req.params;
 
   try {
-    console.log(`Calling stored procedure GenerateTreeXML for user ID: ${userId}, plan ID: ${planId}`);
+    // Set large max length for group_concat
+    await db.query("SET SESSION group_concat_max_len = 10000000000;");
 
     // Call the stored procedure
     const [results] = await db.query("CALL GenerateTreeXML(?, ?)", [userId, planId]);
 
-    // Stored procedure returns XML in results[0][0].TreeXML
     const treeXML = results[0][0]?.TreeXML;
 
     if (!treeXML) {
-      return res.status(404).json({ error: "No tree data found" });
+      return res.status(404).json({ error: "You do not have tree of this Plan" });
     }
 
     res.set("Content-Type", "application/xml");
