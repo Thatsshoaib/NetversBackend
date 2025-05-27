@@ -83,28 +83,6 @@ router.get("/total-income", async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 });
-// Get all users
-router.get("/users", async (req, res) => {
-    const { u_code } = req.query;
-  
-    try {
-      let query = "SELECT user_id, name, email FROM users";
-      let params = [];
-  
-      // If u_code is provided, add WHERE clause
-      if (u_code) {
-        query += " WHERE u_code = ?";
-        params.push(u_code);
-      }
-  
-      const [users] = await db.query(query, params);
-      res.json(users);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  });
-
 
 
 
@@ -130,5 +108,10 @@ router.get('/all-users', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+
+ 
+  
 
 module.exports = router;
