@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../Config/db");
 
 const router = express.Router();
+
 // Route to Generate E-PINs Using Stored Procedure
 router.post("/generate-epins", async (req, res) => {
   try {
@@ -132,7 +133,7 @@ router.get("/user-unused-epins", async (req, res) => {
     const [epins] = await db.execute(
       `SELECT epins.id, epins.epin_code, epins.status, epins.assigned_to, epins.created_at, epins.plan_id 
        FROM epins
-       WHERE epins.assigned_to = ? AND epins.status = 'unused'`,
+       WHERE epins.assigned_to = ? AND epins.status = 'unused' AND plan_id = 1`,
       [userId]
     );
 
@@ -197,6 +198,14 @@ router.post("/reshare-epin", async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+// ✅ Mark a specific E-PIN as used
 
 
 module.exports = router;
