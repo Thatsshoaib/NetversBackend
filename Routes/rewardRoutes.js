@@ -2,6 +2,14 @@ const express = require("express");
 const router = express.Router();
 const db = require("../Config/db"); // MySQL connection file
 
+
+
+router.get("/test", (req, res) => {
+  console.log("✅ /api/rewards/test hit");
+  res.send("Test route working");
+});
+
+
 // Add Reward
 router.post("/add", async (req, res) => {
   const { plan_id, no_of_directs, title, image, description } = req.body;
