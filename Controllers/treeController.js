@@ -1,4 +1,4 @@
-const db = require("../config/db");
+const db = require("../Config/db");
 
 // ✅ Function to build hierarchical tree
 const buildTree = (users, rootId) => {
