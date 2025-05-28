@@ -37,7 +37,9 @@ router.post("/add", async (req, res) => {
   const { user_id, amount, transaction_id } = req.body;
 
   if (!user_id || !amount || isNaN(amount) || !transaction_id) {
-    return res.status(400).json({ success: false, message: "Invalid input data" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid input data" });
   }
 
   const sql = `
@@ -47,39 +49,40 @@ router.post("/add", async (req, res) => {
 
   try {
     await db.query(sql, [user_id, amount || null, transaction_id]);
-    return res.status(200).json({ success: true, message: "Payout recorded successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Payout recorded successfully" });
   } catch (err) {
     console.error("Insert Error:", err.sqlMessage || err.message || err);
-    return res.status(500).json({ success: false, message: "Failed to record payout" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to record payout" });
   }
 });
 router.get("/wallet-balance", async (req, res) => {
   const { userId } = req.query;
 
   if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+    return res.status(400).json({ error: "User ID is required" });
   }
 
   try {
-      const [walletData] = await db.execute(
-          "SELECT total_amount FROM wallet WHERE user_id = ?",
-          [userId]
-      );
+    const [walletData] = await db.execute(
+      "SELECT total_amount FROM wallet WHERE user_id = ?",
+      [userId]
+    );
 
-      if (!walletData || walletData.length === 0) {
-          return res.json({ wallet_balance: 0 });
-      }
+    if (!walletData || walletData.length === 0) {
+      return res.json({ wallet_balance: 0 });
+    }
 
-      // ✅ Correct field used here
-      return res.json({ wallet_balance: walletData[0]?.total_amount || 0 });
+    // ✅ Correct field used here
+    return res.json({ wallet_balance: walletData[0]?.total_amount || 0 });
   } catch (error) {
-      console.error("Database error:", error);
-      return res.status(500).json({ error: "Internal server error" });
+    console.error("Database error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
-
 
 router.get("/user/:userId", async (req, res) => {
   const { userId } = req.params;
@@ -102,7 +105,6 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
-
 router.get("/totals", async (req, res) => {
   try {
     const [results] = await db.execute(`
@@ -120,7 +122,6 @@ router.get("/totals", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 router.get("/all-payouts", async (req, res) => {
   try {
@@ -149,7 +150,5 @@ ORDER BY p.payout_date DESC`
     res.status(500).json({ error: "Failed to fetch payout history" });
   }
 });
-
-
 
 module.exports = router;
