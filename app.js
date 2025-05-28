@@ -53,7 +53,7 @@ app.use("/api", treeRoutes);
 app.use("/api/users", sponsorRoutes);
 app.use("/api/commissions", commissionsRoutes);
 app.use("/api/epins", epinRoutes);
-app.use("/api/epins", epinHistoryRoutes); 
+app.use("/api/epins-history", epinHistoryRoutes); 
 app.use("/api/rewards", rewardRoutes);
 app.use("/api/upgrade", upgradeRoutes);
 app.use("/api/profile", ProfileRoutes); 
