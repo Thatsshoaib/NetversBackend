@@ -3,6 +3,13 @@ const db = require("../Config/db"); // Import database connection
 
 const router = express.Router();
 
+
+
+router.get("/test", (req, res) => {
+  console.log("✅ /api/rewards/test hit");
+  res.send("Test route working");
+});
+
 router.get("/:userId", async (req, res) => {
   const userId = req.params.userId;
   const query = "CALL GetUserCommissions(?)"; // Stored procedure
