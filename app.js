@@ -62,10 +62,11 @@ app.use("/api/plan", userRoutes);
 app.use("/api/pswrd", passwordRoutes);
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
