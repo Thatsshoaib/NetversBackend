@@ -60,12 +60,11 @@ app.use("/api/profile", ProfileRoutes);
 app.use("/api/payout", payoutRoutes); 
 app.use("/api/plan", userRoutes);
 app.use("/api/pswrd", passwordRoutes);
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
-});
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 
 
-const PORT = 5000;
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
