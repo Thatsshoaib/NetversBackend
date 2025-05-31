@@ -7,19 +7,20 @@ const commissionsRoutes = require("./Routes/commissionRoutes");
 const epinRoutes = require("./Routes/epinRoutes");
 const epinHistoryRoutes = require("./Routes/epinHistoryRoutes"); 
 const rewardRoutes = require("./Routes/rewardRoutes"); 
-const upgradeRoutes = require("./Routes/upgradeRoutes")
-const ProfileRoutes = require("./Routes/profileRoutes")
-const payoutRoutes = require("./Routes/payoutRoutes")
-const userRoutes = require("./Routes/userRoutes")
-const passwordRoutes = require("./Routes/pswrdRoutes")
+const upgradeRoutes = require("./Routes/upgradeRoutes");
+const ProfileRoutes = require("./Routes/profileRoutes");
+const payoutRoutes = require("./Routes/payoutRoutes");
+const userRoutes = require("./Routes/userRoutes");
+const passwordRoutes = require("./Routes/pswrdRoutes");
 const db = require('./Config/db'); 
+
 const app = express();
 const path = require('path');
-
 const multer = require("multer");
 const fs = require("fs");
-const uploadsDir = path.join(__dirname, "uploads/profiles");
 
+// ✅ Set up uploads directory for profile images
+const uploadsDir = path.join(__dirname, "uploads/profiles");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -37,17 +38,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Serve static images from /uploads
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(
   "/uploads/profiles",
   express.static(path.join(__dirname, "uploads", "profiles"))
 );
+app.use(express.static(path.join(__dirname, 'dist')));
 
+// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api", treeRoutes);
 app.use("/api/users", sponsorRoutes);
@@ -60,13 +61,14 @@ app.use("/api/profile", ProfileRoutes);
 app.use("/api/payout", payoutRoutes); 
 app.use("/api/plan", userRoutes);
 app.use("/api/pswrd", passwordRoutes);
+
+// ✅ Catch-all route to serve index.html for React frontend
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+}); // ✅ FIXED: closing bracket added
 
+// ✅ Start server
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
