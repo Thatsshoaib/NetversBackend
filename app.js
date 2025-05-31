@@ -43,7 +43,7 @@ app.use("/api/pswrd", passwordRoutes); // this is my file for the bankdetails
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
-const port = 3000;
+const port = 80;
 const hostname = '0.0.0.0';
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
