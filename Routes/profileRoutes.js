@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const db = require("../Config/db");
+const fs = require("fs");
 
 const router = express.Router();
 
@@ -21,6 +22,14 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
 });
+
+// Helper to convert file to base64 string
+const toBase64 = (fileName) => {
+  if (!fileName) return null;
+  const fullPath = path.join(__dirname, "..", "uploads", "profiles", fileName);
+  const fileBuffer = fs.readFileSync(fullPath);
+  return fileBuffer.toString("base64");
+};
 
 router.post(
   "/profile-details",
@@ -44,10 +53,13 @@ router.post(
         ifsc_code,
       } = req.body;
 
-      // Uploaded files filenames or null
-      const aadhaar_front = req.files?.aadhaar_front?.[0]?.filename || null;
-      const aadhaar_back = req.files?.aadhaar_back?.[0]?.filename || null;
-      const bank_passbook = req.files?.bank_passbook?.[0]?.filename || null;
+      const aadhaar_front_file = req.files?.aadhaar_front?.[0]?.filename || null;
+      const aadhaar_back_file = req.files?.aadhaar_back?.[0]?.filename || null;
+      const bank_passbook_file = req.files?.bank_passbook?.[0]?.filename || null;
+
+      const aadhaar_front = toBase64(aadhaar_front_file);
+      const aadhaar_back = toBase64(aadhaar_back_file);
+      const bank_passbook = toBase64(bank_passbook_file);
 
       // Check for existing profile
       const [existing] = await db.query(
@@ -59,7 +71,7 @@ router.post(
         return res.status(409).json({ error: "Profile already exists" });
       }
 
-      // Insert into DB
+      // Insert base64 strings into DB
       await db.query(
         `INSERT INTO user_profiles (
           user_id, address_line1, city, state, pincode, country,
@@ -93,12 +105,15 @@ router.post(
 
 
 
-
 router.get("/all-user-images", async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT 
   up.user_id,
+  up.address_line1,
+  up.bank_name,
+  up.account_holder_name,
+  up.account_number,
   up.aadhaar_front,
   up.aadhaar_back,
   up.bank_passbook,
