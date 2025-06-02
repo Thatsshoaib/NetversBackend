@@ -3,8 +3,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../Config/db"); // ✅ Import the fixed MySQL connection
 
-const router = express.Router();
-// POST /api/admin/upgrade-plan
 router.post('/admin/upgrade-plan', async (req, res) => {
   const { u_code, plan_id, epin_code, user_id } = req.body;
 
