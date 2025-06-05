@@ -150,4 +150,29 @@ router.get("/paid-history", async (req, res) => {
     });
   }
 });
+
+
+router.get("/paid-status/:userId/:rewardId", async (req, res) => {
+  const { userId, rewardId } = req.params;
+
+  try {
+    const [result] = await db.execute(
+      `SELECT paid FROM userrewards WHERE user_id = ? AND reward_id = ? LIMIT 1`,
+      [userId, rewardId]
+    );
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "No entry found", paid: null });
+    }
+
+    return res.status(200).json({
+      paid: result[0].paid,
+      message: `Paid status is '${result[0].paid}'`,
+    });
+  } catch (err) {
+    console.error("Error fetching paid status:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = router;
