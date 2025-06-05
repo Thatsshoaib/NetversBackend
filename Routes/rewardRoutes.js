@@ -157,21 +157,18 @@ router.get("/paid-status/:userId/:rewardId", async (req, res) => {
 
   try {
     const [result] = await db.execute(
-      `SELECT paid FROM userrewards WHERE user_id = ? AND reward_id = ? LIMIT 1`,
+      "SELECT paid FROM userrewards WHERE user_id = ? AND reward_id = ? LIMIT 1",
       [userId, rewardId]
     );
 
     if (result.length === 0) {
-      return res.status(404).json({ message: "No entry found", paid: null });
+      return res.status(200).json({ paid: "no" }); // respond with "no" if not found
     }
 
-    return res.status(200).json({
-      paid: result[0].paid,
-      message: `Paid status is '${result[0].paid}'`,
-    });
+    return res.status(200).json({ paid: result[0].paid });
   } catch (err) {
-    console.error("Error fetching paid status:", err);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Error checking paid status:", err);
+    return res.status(500).json({ message: "Server error", paid: "no" });
   }
 });
 
