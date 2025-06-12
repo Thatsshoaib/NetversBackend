@@ -41,6 +41,9 @@ router.post(
   ]),
   async (req, res) => {
     try {
+      console.log("🟢 Body:", req.body);
+      console.log("🟢 Files:", req.files);
+
       const {
         user_id,
         address_line1,
@@ -58,9 +61,18 @@ router.post(
       const aadhaar_back_file = req.files?.aadhaar_back?.[0]?.filename || null;
       const bank_passbook_file = req.files?.bank_passbook?.[0]?.filename || null;
 
-      const aadhaar_front = toBase64(aadhaar_front_file);
-      const aadhaar_back = toBase64(aadhaar_back_file);
-      const bank_passbook = toBase64(bank_passbook_file);
+      let aadhaar_front = null;
+      let aadhaar_back = null;
+      let bank_passbook = null;
+
+      try {
+        if (aadhaar_front_file) aadhaar_front = toBase64(aadhaar_front_file);
+        if (aadhaar_back_file) aadhaar_back = toBase64(aadhaar_back_file);
+        if (bank_passbook_file) bank_passbook = toBase64(bank_passbook_file);
+      } catch (fileErr) {
+        console.error("❌ File reading error:", fileErr.message);
+        return res.status(500).json({ error: "Error processing uploaded files" });
+      }
 
       // Check for existing profile
       const [existing] = await db.query(
@@ -72,7 +84,7 @@ router.post(
         return res.status(409).json({ error: "Profile already exists" });
       }
 
-      // Insert base64 strings into DB
+      // Insert into database
       await db.query(
         `INSERT INTO user_profiles (
           user_id, address_line1, city, state, pincode, country,
@@ -96,9 +108,10 @@ router.post(
         ]
       );
 
-      return res.status(201).json({ message: "Profile created successfully" });
+      return res.status(201).json({ message: "✅ Profile created successfully" });
     } catch (error) {
-      console.error("Profile creation error:", error);
+      console.error("❌ Profile creation error:", error.message);
+      console.error("📜 Stack Trace:", error.stack);
       return res.status(500).json({ error: "Server error while creating profile" });
     }
   }
