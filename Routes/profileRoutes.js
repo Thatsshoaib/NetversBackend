@@ -40,6 +40,7 @@ router.post(
     { name: "bank_passbook", maxCount: 1 },
   ]),
   async (req, res) => {
+     console.log("✅ Route hit");
     try {
       const {
         user_id,
