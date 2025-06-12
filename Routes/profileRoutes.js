@@ -41,9 +41,6 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      console.log("🟢 Body:", req.body);
-      console.log("🟢 Files:", req.files);
-
       const {
         user_id,
         address_line1,
@@ -57,22 +54,16 @@ router.post(
         ifsc_code,
       } = req.body;
 
+      console.log("📥 Incoming form data:", req.body);
+      console.log("📸 Incoming files:", req.files);
+
       const aadhaar_front_file = req.files?.aadhaar_front?.[0]?.filename || null;
       const aadhaar_back_file = req.files?.aadhaar_back?.[0]?.filename || null;
       const bank_passbook_file = req.files?.bank_passbook?.[0]?.filename || null;
 
-      let aadhaar_front = null;
-      let aadhaar_back = null;
-      let bank_passbook = null;
-
-      try {
-        if (aadhaar_front_file) aadhaar_front = toBase64(aadhaar_front_file);
-        if (aadhaar_back_file) aadhaar_back = toBase64(aadhaar_back_file);
-        if (bank_passbook_file) bank_passbook = toBase64(bank_passbook_file);
-      } catch (fileErr) {
-        console.error("❌ File reading error:", fileErr.message);
-        return res.status(500).json({ error: "Error processing uploaded files" });
-      }
+      const aadhaar_front = aadhaar_front_file ? toBase64(aadhaar_front_file) : null;
+      const aadhaar_back = aadhaar_back_file ? toBase64(aadhaar_back_file) : null;
+      const bank_passbook = bank_passbook_file ? toBase64(bank_passbook_file) : null;
 
       // Check for existing profile
       const [existing] = await db.query(
@@ -84,7 +75,7 @@ router.post(
         return res.status(409).json({ error: "Profile already exists" });
       }
 
-      // Insert into database
+      // Insert base64 strings into DB
       await db.query(
         `INSERT INTO user_profiles (
           user_id, address_line1, city, state, pincode, country,
@@ -110,8 +101,8 @@ router.post(
 
       return res.status(201).json({ message: "✅ Profile created successfully" });
     } catch (error) {
-      console.error("❌ Profile creation error:", error.message);
-      console.error("📜 Stack Trace:", error.stack);
+      console.error("🔥 Server error in /profile-details route:", error.message);
+      console.error("🧠 Stack trace:", error.stack);
       return res.status(500).json({ error: "Server error while creating profile" });
     }
   }
