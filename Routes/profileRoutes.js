@@ -6,90 +6,41 @@ const fs = require("fs");
 
 const router = express.Router();
 
-// Setup multer
+// Multer storage setup
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "..", "uploads");
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath);
-    }
-    cb(null, uploadPath);
+  destination: function (req, file, cb) {
+    cb(null, "uploads/profiles");
   },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`);
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const uniqueName = Date.now() + "-" + file.fieldname + ext;
+    cb(null, uniqueName);
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
+});
 
-const uploadFields = upload.fields([
-  { name: "aadhaar_front", maxCount: 1 },
-  { name: "aadhaar_back", maxCount: 1 },
-  { name: "bank_passbook", maxCount: 1 },
-]);
+// Helper to convert file to base64 string
+const toBase64 = (fileName) => {
+  if (!fileName) return null;
+  const fullPath = path.join(__dirname, "..", "uploads", "profiles", fileName);
+  const fileBuffer = fs.readFileSync(fullPath);
+  return fileBuffer.toString("base64");
+};
 
-// Convert to base64
-function toBase64(filePath) {
-  if (!filePath) return null;
-  try {
-    const fullPath = path.join(__dirname, "..", "uploads", filePath);
-    return fs.readFileSync(fullPath, { encoding: "base64" });
-  } catch (e) {
-    console.error("❌ File read failed:", filePath);
-    return null;
-  }
-}
-
-router.post("/profile-details", (req, res, next) => {
-  uploadFields(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      console.error("❌ Multer error:", err);
-      return res.status(400).json({ error: "File upload error", details: err.message });
-    } else if (err) {
-      console.error("❌ Unknown upload error:", err);
-      return res.status(500).json({ error: "Unknown error during upload" });
-    }
-    next();
-  });
-}, async (req, res) => {
-  try {
-    console.log("📥 Body:", req.body);
-    console.log("📸 Files:", req.files);
-
-    const {
-      user_id,
-      address_line1,
-      city,
-      state,
-      pincode,
-      country,
-      bank_name,
-      account_holder_name,
-      account_number,
-      ifsc_code,
-    } = req.body;
-
-    const aadhaar_front_file = req.files?.aadhaar_front?.[0]?.filename || null;
-    const aadhaar_back_file = req.files?.aadhaar_back?.[0]?.filename || null;
-    const bank_passbook_file = req.files?.bank_passbook?.[0]?.filename || null;
-
-    const aadhaar_front = toBase64(aadhaar_front_file);
-    const aadhaar_back = toBase64(aadhaar_back_file);
-    const bank_passbook = toBase64(bank_passbook_file);
-
-    // Check if profile already exists
-    const [existing] = await db.query("SELECT * FROM user_profiles WHERE user_id = ?", [user_id]);
-    if (existing.length > 0) {
-      return res.status(409).json({ error: "Profile already exists" });
-    }
-
-    await db.query(
-      `INSERT INTO user_profiles (
-        user_id, address_line1, city, state, pincode, country,
-        bank_name, account_holder_name, account_number, ifsc_code,
-        aadhaar_front, aadhaar_back, bank_passbook
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
+router.post(
+  "/profile-details",
+  upload.fields([
+    { name: "aadhaar_front", maxCount: 1 },
+    { name: "aadhaar_back", maxCount: 1 },
+    { name: "bank_passbook", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const {
         user_id,
         address_line1,
         city,
@@ -100,18 +51,58 @@ router.post("/profile-details", (req, res, next) => {
         account_holder_name,
         account_number,
         ifsc_code,
-        aadhaar_front,
-        aadhaar_back,
-        bank_passbook,
-      ]
-    );
+      } = req.body;
 
-    return res.status(201).json({ message: "✅ Profile created successfully" });
-  } catch (error) {
-    console.error("🔥 Internal server error:", error);
-    return res.status(500).json({ error: "Server error while creating profile" });
+      const aadhaar_front_file = req.files?.aadhaar_front?.[0]?.filename || null;
+      const aadhaar_back_file = req.files?.aadhaar_back?.[0]?.filename || null;
+      const bank_passbook_file = req.files?.bank_passbook?.[0]?.filename || null;
+
+      const aadhaar_front = toBase64(aadhaar_front_file);
+      const aadhaar_back = toBase64(aadhaar_back_file);
+      const bank_passbook = toBase64(bank_passbook_file);
+
+      // Check for existing profile
+      const [existing] = await db.query(
+        "SELECT * FROM user_profiles WHERE user_id = ?",
+        [user_id]
+      );
+
+      if (existing.length > 0) {
+        return res.status(409).json({ error: "Profile already exists" });
+      }
+
+      // Insert base64 strings into DB
+      await db.query(
+        `INSERT INTO user_profiles (
+          user_id, address_line1, city, state, pincode, country,
+          bank_name, account_holder_name, account_number, ifsc_code,
+          aadhaar_front, aadhaar_back, bank_passbook
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          user_id,
+          address_line1,
+          city,
+          state,
+          pincode,
+          country,
+          bank_name,
+          account_holder_name,
+          account_number,
+          ifsc_code,
+          aadhaar_front,
+          aadhaar_back,
+          bank_passbook,
+        ]
+      );
+
+      return res.status(201).json({ message: "Profile created successfully" });
+    } catch (error) {
+      console.error("Profile creation error:", error);
+      return res.status(500).json({ error: "Server error while creating profile" });
+    }
   }
-});
+);
+
 
 
 router.get("/all-user-images", async (req, res) => {
