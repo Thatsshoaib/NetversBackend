@@ -26,6 +26,7 @@ const upload = multer({
 // Helper to convert file to base64 string
 const toBase64 = (fileName) => {
   if (!fileName) return null;
+  
   const fullPath = path.join(__dirname, "..", "uploads", "profiles", fileName);
   const fileBuffer = fs.readFileSync(fullPath);
   return fileBuffer.toString("base64");
